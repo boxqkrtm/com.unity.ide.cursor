@@ -450,10 +450,29 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 		}
 
 		private Process FindRunningCursorWithSolution(string solutionPath) {
-			var directory = IOPath.GetDirectoryName(solutionPath);
-			var processes = Process.GetProcessesByName("cursor");
+			var normalizedTargetPath = solutionPath.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
 			
-			var normalizedTargetPath = directory.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
+#if UNITY_EDITOR_WIN
+			// Keep as is for Windows platform since path already includes drive letter
+#else
+			// Ensure path starts with / for macOS and Linux platforms
+			if (!normalizedTargetPath.StartsWith("/")) {
+				normalizedTargetPath = "/" + normalizedTargetPath;
+			}
+#endif
+			
+			var processes = new List<Process>();
+			
+			// Get process name list based on different operating systems
+#if UNITY_EDITOR_OSX
+			processes.AddRange(Process.GetProcessesByName("Cursor"));
+			processes.AddRange(Process.GetProcessesByName("Cursor Helper"));
+#elif UNITY_EDITOR_LINUX
+			processes.AddRange(Process.GetProcessesByName("cursor"));
+			processes.AddRange(Process.GetProcessesByName("Cursor"));
+#else
+			processes.AddRange(Process.GetProcessesByName("cursor"));
+#endif
 			
 			foreach (var process in processes) {
 				try {
@@ -461,6 +480,15 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 					if (workspaces != null && workspaces.Length > 0) {
 						foreach (var workspace in workspaces) {
 							var normalizedWorkspaceDir = workspace.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
+							
+#if UNITY_EDITOR_WIN
+							// Keep as is for Windows platform
+#else
+							// Ensure path starts with / for macOS and Linux platforms
+							if (!normalizedWorkspaceDir.StartsWith("/")) {
+								normalizedWorkspaceDir = "/" + normalizedWorkspaceDir;
+							}
+#endif
 
 							if (string.Equals(normalizedWorkspaceDir, normalizedTargetPath, StringComparison.OrdinalIgnoreCase) ||
 								normalizedTargetPath.StartsWith(normalizedWorkspaceDir + "/", StringComparison.OrdinalIgnoreCase) ||
