@@ -507,6 +507,15 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 			return null;
 		}
 
+		private static string TryFindWorkspace(string directory)
+		{
+			var files = Directory.GetFiles(directory, "*.code-workspace", SearchOption.TopDirectoryOnly);
+			if (files.Length == 0 || files.Length > 1)
+				return null;
+
+			return files[0];
+		}
+
 		public override bool Open(string path, int line, int column, string solution) {
 			line = Math.Max(1, line);
 			column = Math.Max(0, column);
@@ -514,6 +523,10 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 			var directory = IOPath.GetDirectoryName(solution);
 			var application = Path;
 
+			var workspace = TryFindWorkspace(directory);
+			workspace ??= directory;
+			directory = workspace;
+			
 			var existingProcess = FindRunningCursorWithSolution(directory);
 			if (existingProcess != null) {
 				try {
