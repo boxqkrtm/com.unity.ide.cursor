@@ -7,107 +7,111 @@
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**為 Unity 開發者提供完整的 Cursor 編輯器整合體驗**
+**Complete Cursor editor integration for Unity developers**
 
-*自動專案配置 • IntelliSense 支援 • 跨平台相容 • 除錯整合*
+*Auto Project Configuration • IntelliSense Support • Cross-Platform Compatible • Debug Integration*
+
+[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
 </div>
 
 ---
 
-## ✨ 功能特色
+## ✨ Features
 
-🚀 **一鍵整合** - 自動發現並整合 Cursor 編輯器到 Unity 工作流程  
-📁 **智慧專案生成** - 自動生成 `.csproj` 文件，完整支援 IntelliSense  
-🔍 **多版本支援** - 支援 Cursor 正式版和 Insider 版本  
-🌐 **跨平台相容** - Windows、macOS、Linux 全平台支援  
-⚙️ **自動配置** - 自動創建 VSCode 配置文件和推薦擴充套件  
-🎯 **靈活控制** - 細緻控制不同類型套件的專案生成  
+🚀 **One-Click Integration** - Automatically discover and integrate Cursor editor into Unity workflow  
+📁 **Smart Project Generation** - Auto-generate `.csproj` files with full IntelliSense support  
+🔍 **Multi-Version Support** - Support both Cursor stable and Insider versions  
+🌐 **Cross-Platform Compatible** - Windows, macOS, Linux full platform support  
+⚙️ **Auto Configuration** - Automatically create VSCode config files and recommended extensions  
+🎯 **Flexible Control** - Fine-grained control over project generation for different package types  
 
-## 📋 系統需求
+## 📋 System Requirements
 
-- **Unity**: 2019.4.25f1 或更新版本
-- **Cursor**: 任何版本（自動檢測）
-- **平台**: Windows、macOS、Linux
+- **Unity**: 2019.4.25f1 or newer
+- **Cursor**: Any version (auto-detected)
+- **Platform**: Windows, macOS, Linux
 
-## 📦 安裝方式
+## 📦 Installation
 
-### 方法一：透過 Unity Package Manager（推薦）
+### Method 1: Via Unity Package Manager (Recommended)
 
-1. 開啟 Unity 編輯器
-2. 選擇 `Window` → `Package Manager`
-3. 點擊左上角的 **`+`** 按鈕
-4. 選擇 `Add package from git URL...`
-5. 輸入以下 URL：
+1. Open Unity Editor
+2. Go to `Window` → `Package Manager`
+3. Click the **`+`** button at the top left
+4. Select `Add package from git URL...`
+5. Enter the following URL:
    ```
    https://github.com/boxqkrtm/com.unity.ide.cursor.git
    ```
-6. 點擊 `Add` 按鈕
-7. 等待安裝完成 ✅
+6. Click `Add` button
+7. Wait for installation to complete ✅
 
-### 方法二：手動下載
+### Method 2: Manual Download
 
-1. 下載最新版本的 [Release](https://github.com/boxqkrtm/com.unity.ide.cursor/releases)
-2. 解壓縮到您的專案 `Packages` 資料夾中
+1. Download the latest [Release](https://github.com/boxqkrtm/com.unity.ide.cursor/releases)
+2. Extract to your project's `Packages` folder
 
-## 🛠️ 使用說明
+## 🛠️ Usage
 
-### 基本設定
+### Basic Setup
 
-1. **設定 Cursor 為預設編輯器**：
+1. **Set Cursor as Default Editor**:
    - `Edit` → `Preferences` → `External Tools`
-   - 在 `External Script Editor` 中選擇 Cursor
+   - Select Cursor in `External Script Editor`
 
-2. **配置專案生成選項**：
-   - 在 External Tools 設定中，您可以選擇為以下項目生成專案文件：
-     - ✅ 內嵌套件 (Embedded packages)
-     - ✅ 本地套件 (Local packages)  
-     - ✅ 註冊表套件 (Registry packages)
-     - ✅ Git 套件 (Git packages)
-     - ✅ 內建套件 (Built-in packages)
-     - ✅ 本地壓縮檔 (Local tarball)
-     - ✅ 未知來源套件 (Unknown sources)
-     - ✅ 播放器專案 (Player projects)
+2. **Configure Project Generation Options**:
+   - In External Tools settings, you can choose to generate project files for:
+     - ✅ Embedded packages
+     - ✅ Local packages  
+     - ✅ Registry packages
+     - ✅ Git packages
+     - ✅ Built-in packages
+     - ✅ Local tarball
+     - ✅ Unknown sources
+     - ✅ Player projects
 
-3. **重新生成專案文件**：
-   - 點擊 `Regenerate project files` 按鈕立即更新
+3. **Regenerate Project Files**:
+   - Click `Regenerate project files` button to update immediately
 
-### 自動功能
+### Automatic Features
 
-套件安裝後會自動：
-- 🔍 檢測 Cursor 安裝位置
-- 📝 生成 `.csproj` 文件
-- ⚙️ 創建 `.vscode/launch.json` 配置
-- 🎨 設定 `.vscode/settings.json` 偏好設定
-- 📦 推薦相關的 VSCode 擴充套件
+After installation, the package will automatically:
+- 🔍 Detect Cursor installation path
+- 📝 Generate `.csproj` files
+- ⚙️ Create `.vscode/launch.json` configuration
+- 🎨 Setup `.vscode/settings.json` preferences
+- 📦 Recommend relevant VSCode extensions
 
-## 🎯 支援的套件類型
+## 🎯 Supported Package Types
 
-| 套件類型 | 描述 | 預設啟用 |
-|---------|------|---------|
-| **Embedded** | 專案內嵌套件 | ✅ |
-| **Local** | 本地開發套件 | ✅ |
-| **Registry** | Unity Registry 套件 | ✅ |
-| **Git** | Git 來源套件 | ✅ |
-| **Built-in** | Unity 內建套件 | ❌ |
-| **Local Tarball** | 本地壓縮檔套件 | ✅ |
-| **Unknown** | 未知來源套件 | ❌ |
+| Package Type | Description | Default Enabled |
+|-------------|-------------|----------------|
+| **Embedded** | Project embedded packages | ✅ |
+| **Local** | Local development packages | ✅ |
+| **Registry** | Unity Registry packages | ✅ |
+| **Git** | Git source packages | ✅ |
+| **Built-in** | Unity built-in packages | ❌ |
+| **Local Tarball** | Local tarball packages | ✅ |
+| **Unknown** | Unknown source packages | ❌ |
 
-## ⚠️ 重要更新通知
+## ⚠️ Important Update Notice
 
-> **從舊版本更新的使用者請注意**  
-> 從 **v2.0.24** 版本開始，套件名稱已從 `com.unity.ide.cursor` 變更為 `com.boxqkrtm.ide.cursor`，以避免與 Unity 官方套件命名衝突。  
+> **Notice for Users Updating from Older Versions**  
+> Starting from **v2.0.24**, the package name has been changed from `com.unity.ide.cursor` to `com.boxqkrtm.ide.cursor` to prevent potential issues with Unity regarding attribution.  
 > 
-> 如果在更新過程中遇到錯誤，請先移除舊套件再重新安裝新版本以避免衝突。
+> If you experience errors during the update, please remove the existing package before reinstalling the new one to avoid conflicts.
 
-## 🔧 進階配置
+## 🔧 Advanced Configuration
 
-### 自訂 VSCode 設定
+### Custom VSCode Settings
 
-套件會自動創建以下配置文件，您也可以手動調整：
+The package automatically creates the following configuration files, which you can manually adjust:
+
+<details>
+<summary>Click to view .vscode/settings.json example</summary>
 
 ```json
-// .vscode/settings.json
 {
     "files.exclude": {
         "**/.DS_Store": true,
@@ -165,38 +169,40 @@
 }
 ```
 
-## 🤝 貢獻指南
+</details>
 
-我們歡迎社群貢獻！請查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解詳細資訊。
+## 🤝 Contributing
 
-### 報告問題
+We welcome community contributions! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for detailed information.
 
-如果您遇到任何問題，請：
-1. 檢查 [現有 Issues](https://github.com/boxqkrtm/com.unity.ide.cursor/issues)
-2. 創建新的 Issue 並提供詳細資訊
-3. 包含您的 Unity 版本、作業系統和 Cursor 版本
+### Reporting Issues
 
-### 功能建議
+If you encounter any problems, please:
+1. Check [existing Issues](https://github.com/boxqkrtm/com.unity.ide.cursor/issues)
+2. Create a new Issue with detailed information
+3. Include your Unity version, OS, and Cursor version
 
-有好的想法？歡迎在 [Issues](https://github.com/boxqkrtm/com.unity.ide.cursor/issues) 中提出功能建議！
+### Feature Requests
 
-## 📄 授權
+Have a great idea? Feel free to suggest features in [Issues](https://github.com/boxqkrtm/com.unity.ide.cursor/issues)!
 
-本專案採用 [MIT License](LICENSE.md) 授權。
+## 📄 License
 
-## 📚 更多資源
+This project is licensed under the [MIT License](LICENSE.md).
 
-- 📖 [詳細文件](Documentation~/README.md)
-- 🔄 [更新日誌](CHANGELOG.md)
-- 🐛 [問題回報](https://github.com/boxqkrtm/com.unity.ide.cursor/issues)
-- 💬 [討論區](https://github.com/boxqkrtm/com.unity.ide.cursor/discussions)
+## 📚 Additional Resources
+
+- 📖 [Detailed Documentation](Documentation~/README.md)
+- 🔄 [Changelog](CHANGELOG.md)
+- 🐛 [Bug Reports](https://github.com/boxqkrtm/com.unity.ide.cursor/issues)
+- 💬 [Discussions](https://github.com/boxqkrtm/com.unity.ide.cursor/discussions)
 
 ---
 
 <div align="center">
 
-**享受使用 Cursor 進行 Unity 開發的樂趣！** 🎮✨
+**Enjoy Unity development with Cursor!** 🎮✨
 
-如果這個專案對您有幫助，請給我們一個 ⭐️
+If this project helps you, please give us a ⭐️
 
 </div>
