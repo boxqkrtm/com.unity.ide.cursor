@@ -11,7 +11,7 @@
 
 *자동 프로젝트 구성 • IntelliSense 지원 • 크로스 플랫폼 호환 • 디버그 통합*
 
-[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+🇺🇸 [English](README.md) | 🇹🇼 [繁體中文](README.zh-TW.md) | 🇨🇳 [简体中文](README.zh-CN.md) | 🇯🇵 [日本語](README.ja.md) | 🇰🇷 [한국어](README.ko.md)
 
 </div>
 

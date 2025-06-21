@@ -11,7 +11,7 @@
 
 *自动项目配置 • IntelliSense 支持 • 跨平台兼容 • 调试集成*
 
-[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+🇺🇸 [English](README.md) | 🇹🇼 [繁體中文](README.zh-TW.md) | 🇨🇳 [简体中文](README.zh-CN.md) | 🇯🇵 [日本語](README.ja.md) | 🇰🇷 [한국어](README.ko.md)
 
 </div>
 
