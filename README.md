@@ -11,7 +11,7 @@
 
 *Auto Project Configuration • IntelliSense Support • Cross-Platform Compatible • Debug Integration*
 
-🇺🇸 [English](README.md) | 🇹🇼 [繁體中文](README.zh-TW.md) | 🇨🇳 [简体中文](README.zh-CN.md) | 🇯🇵 [日本語](README.ja.md) | 🇰🇷 [한국어](README.ko.md)
+🇺🇸 [English](README.md) | 🇹🇼 [繁體中文](i18n/README.zh-TW.md) | 🇨🇳 [简体中文](i18n/README.zh-CN.md) | 🇯🇵 [日本語](i18n/README.ja.md) | 🇰🇷 [한국어](i18n/README.ko.md) | 🇩🇪 [Deutsch](i18n/README.de.md) | 🇫🇷 [Français](i18n/README.fr.md) | 🇪🇸 [Español](i18n/README.es.md) | 🇷🇺 [Русский](i18n/README.ru.md) | 🇵🇹 [Português](i18n/README.pt.md) | 🇮🇹 [Italiano](i18n/README.it.md)
 
 </div>
 
