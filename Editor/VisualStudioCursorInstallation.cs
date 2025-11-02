@@ -587,7 +587,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			workspace ??= directory;
 			directory = workspace;
 
-			if (EditorPrefs.GetBool(ReuseExistingWindowKey, true))
+			if (EditorPrefs.GetBool(ReuseExistingWindowKey, false))
 			{
 				var existingProcess = FindRunningCursorWithSolution(directory);
 				if (existingProcess != null)
