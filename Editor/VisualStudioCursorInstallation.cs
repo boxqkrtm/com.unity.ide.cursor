@@ -172,7 +172,7 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 					var desktopFile = IOPath.Combine(dir, "applications/code.desktop");
 					if (!File.Exists(desktopFile))
 						continue;
-				
+
 					var content = File.ReadAllText(desktopFile);
 					match = DesktopFileExecEntry.Match(content);
 				}
@@ -451,7 +451,7 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 
 		private Process FindRunningCursorWithSolution(string solutionPath) {
 			var normalizedTargetPath = solutionPath.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
-			
+
 #if UNITY_EDITOR_WIN
 			// Keep as is for Windows platform since path already includes drive letter
 #else
@@ -460,9 +460,9 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 				normalizedTargetPath = "/" + normalizedTargetPath;
 			}
 #endif
-			
+
 			var processes = new List<Process>();
-			
+
 			// Get process name list based on different operating systems
 #if UNITY_EDITOR_OSX
 			processes.AddRange(Process.GetProcessesByName("Cursor"));
@@ -473,14 +473,14 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 #else
 			processes.AddRange(Process.GetProcessesByName("cursor"));
 #endif
-			
+
 			foreach (var process in processes) {
 				try {
 					var workspaces = ProcessRunner.GetProcessWorkspaces(process);
 					if (workspaces != null && workspaces.Length > 0) {
 						foreach (var workspace in workspaces) {
 							var normalizedWorkspaceDir = workspace.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
-							
+
 #if UNITY_EDITOR_WIN
 							// Keep as is for Windows platform
 #else
@@ -526,14 +526,14 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 			var workspace = TryFindWorkspace(directory);
 			workspace ??= directory;
 			directory = workspace;
-			
+
 			var existingProcess = FindRunningCursorWithSolution(directory);
 			if (existingProcess != null) {
 				try {
-					var args = string.IsNullOrEmpty(path) ? 
-						$"--reuse-window \"{directory}\"" : 
+					var args = string.IsNullOrEmpty(path) ?
+						$"--reuse-window \"{directory}\"" :
 						$"--reuse-window -g \"{path}\":{line}:{column}";
-					
+
 					ProcessRunner.Start(ProcessStartInfoFor(application, args));
 					return true;
 				}
@@ -545,7 +545,7 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 			var newArgs = string.IsNullOrEmpty(path) ?
 				$"--new-window \"{directory}\"" :
 				$"--new-window \"{directory}\" -g \"{path}\":{line}:{column}";
-			
+
 			ProcessRunner.Start(ProcessStartInfoFor(application, newArgs));
 			return true;
 		}
