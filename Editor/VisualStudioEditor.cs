@@ -132,6 +132,16 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			GUILayout.Label($"<size=10><color=grey>{package.displayName} v{package.version} enabled</color></size>", style);
 			GUILayout.EndHorizontal();
 
+			if (installation is VisualStudioCursorInstallation)
+			{
+				var reuseWindow = EditorPrefs.GetBool("cursor_reuse_existing_window", false);
+				var newReuseWindow = EditorGUILayout.Toggle(new GUIContent("Reuse existing Cursor window", "When enabled, opens files in an existing Cursor window if found. When disabled, always opens a new window."), reuseWindow);
+				if (newReuseWindow != reuseWindow)
+					EditorPrefs.SetBool("cursor_reuse_existing_window", newReuseWindow);
+				
+				EditorGUILayout.Space();
+			}
+
 			EditorGUILayout.LabelField("Generate .csproj files for:");
 			EditorGUI.indentLevel++;
 			SettingsButton(ProjectGenerationFlag.Embedded, "Embedded packages", "", installation);

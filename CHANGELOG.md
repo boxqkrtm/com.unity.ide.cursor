@@ -1,5 +1,11 @@
 # Code Editor Package for Cursor
 
+## [2.0.27] - 2025-11-02
+
+Integration:
+
+- Add Multiple or Single Cursor Instance Options
+
 ## [2.0.26] - 2025-11-02
 
 Integration:
@@ -54,7 +60,7 @@ Project generation:
 Integration:
 
 - Performance improvements with `EditorApplication.update` callbacks.
- 
+
 Project generation:
 
 - Add extra compiler options for analyzers and source generators.
@@ -77,7 +83,7 @@ Project generation:
 Integration:
 
 - Prevent ADB Refresh while being in safe-mode with a URP project
-- Fixed an issue keeping the progress bar visible even after opening a script with Visual Studio. 
+- Fixed an issue keeping the progress bar visible even after opening a script with Visual Studio.
 
 ## [2.0.15] - 2022-03-21
 
