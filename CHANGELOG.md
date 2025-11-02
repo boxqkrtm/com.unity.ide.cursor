@@ -1,4 +1,10 @@
-# Code Editor Package for Visual Studio
+# Code Editor Package for Cursor
+
+## [2.0.26] - 2025-11-02
+
+Integration:
+
+- Add workspace support
 
 ## [2.0.22] - 2023-10-03
 
