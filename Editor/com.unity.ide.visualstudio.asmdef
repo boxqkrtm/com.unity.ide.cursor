@@ -1,5 +1,5 @@
 {
-    "name": "Unity.VisualStudio.Editor",
+    "name": "Unity.Cursor.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"

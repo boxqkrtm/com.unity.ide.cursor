@@ -1,25 +1,14 @@
 {
-  "name": "com.unity.ide.visualstudio",
-  "displayName": "Visual Studio Editor",
-  "description": "Code editor integration for supporting Visual Studio as code editor for unity. Adds support for generating csproj files for intellisense purposes, auto discovery of installations, etc.",
-  "version": "2.0.25",
-  "unity": "2021.3",
+  "name": "com.boxqkrtm.ide.cursor",
+  "displayName": "Cursor Editor",
+  "description": "Cursor editor integration for supporting Cursor as code editor for unity. Adds support for generating csproj files for intellisense purposes, auto discovery of installations, etc.",
+  "version": "2.0.26",
+  "unity": "2019.4",
+  "unityRelease": "25f1",
   "dependencies": {
     "com.unity.test-framework": "1.1.31"
   },
-  "relatedPackages": {
-    "com.unity.ide.visualstudio.tests": "2.0.24"
-  },
   "_upm": {
-    "changelog": "Internal:\n\n- Fixes for release validation and release process"
-  },
-  "upmCi": {
-    "footprint": "6717431cf8addc7f65be2658f1770489802205b4"
-  },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.ide.visualstudio@2.0/manual/index.html",
-  "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.ide.visualstudio.git",
-    "type": "git",
-    "revision": "3765e21a94ea1100e4b377121dbf771c3cbd874a"
+    "changelog": "Internal:\n\n- Merge upstream changes from com.unity.ide.visualstudio"
   }
 }

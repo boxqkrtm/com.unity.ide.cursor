@@ -8,6 +8,13 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
+using Debug = UnityEngine.Debug;
+using System.IO;
+using SimpleJSON;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Unity.VisualStudio.Editor
 {
@@ -107,6 +114,100 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 
 			sb?.Append(data);
+		}
+
+		public static string[] GetProcessWorkspaces(Process process)
+		{
+			if (process == null)
+				return null;
+
+			try
+			{
+				var workspaces = new List<string>();
+				var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+				string cursorStoragePath;
+
+#if UNITY_EDITOR_OSX
+				cursorStoragePath = Path.Combine(userProfile, "Library", "Application Support", "cursor", "User", "workspaceStorage");
+#elif UNITY_EDITOR_LINUX
+				cursorStoragePath = Path.Combine(userProfile, ".config", "Cursor", "User", "workspaceStorage");
+#else
+				cursorStoragePath = Path.Combine(userProfile, "AppData", "Roaming", "cursor", "User", "workspaceStorage");
+#endif
+				
+				Debug.Log($"[Cursor] Looking for workspaces in: {cursorStoragePath}");
+				
+				if (Directory.Exists(cursorStoragePath))
+				{
+					foreach (var workspaceDir in Directory.GetDirectories(cursorStoragePath))
+					{
+						try
+						{
+							var workspaceStatePath = Path.Combine(workspaceDir, "workspace.json");
+							if (File.Exists(workspaceStatePath))
+							{
+								var content = File.ReadAllText(workspaceStatePath);
+								if (!string.IsNullOrEmpty(content))
+								{
+									var workspace = JSONNode.Parse(content);
+									if (workspace != null)
+									{
+										var folder = workspace["folder"];
+										if (folder != null && !string.IsNullOrEmpty(folder.Value))
+										{
+											var workspacePath = folder.Value;
+											if (workspacePath.StartsWith("file:///"))
+											{
+												workspacePath = Uri.UnescapeDataString(workspacePath.Substring(8));
+												workspaces.Add(workspacePath);
+											}
+										}
+									}
+								}
+							}
+
+							var windowStatePath = Path.Combine(workspaceDir, "window.json");
+							if (File.Exists(windowStatePath))
+							{
+								var content = File.ReadAllText(windowStatePath);
+								if (!string.IsNullOrEmpty(content))
+								{
+									var windowState = JSONNode.Parse(content);
+									if (windowState != null)
+									{
+										var workspace = windowState["workspace"];
+										if (workspace != null && !string.IsNullOrEmpty(workspace.Value))
+										{
+											var workspacePath = workspace.Value;
+											if (workspacePath.StartsWith("file:///"))
+											{
+												workspacePath = Uri.UnescapeDataString(workspacePath.Substring(8));
+												workspaces.Add(workspacePath);
+											}
+										}
+									}
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							Debug.LogWarning($"[Cursor] Error reading workspace state file: {ex.Message}");
+							continue;
+						}
+					}
+				}
+				else
+				{
+					Debug.LogWarning($"[Cursor] Workspace storage directory not found: {cursorStoragePath}");
+				}
+
+				return workspaces.Distinct().ToArray();
+			}
+			catch (Exception ex)
+			{
+				Debug.LogError($"[Cursor] Error getting workspace directory: {ex.Message}");
+				return null;
+			}
 		}
 	}
 }
