@@ -125,19 +125,19 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			{
 				var workspaces = new List<string>();
 				var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-				string cursorStoragePath;
+				string antigravityStoragePath;
 
 #if UNITY_EDITOR_OSX
-				cursorStoragePath = Path.Combine(userProfile, "Library", "Application Support", "cursor", "User", "workspaceStorage");
+				antigravityStoragePath = Path.Combine(userProfile, "Library", "Application Support", "antigravity", "User", "workspaceStorage");
 #elif UNITY_EDITOR_LINUX
-				cursorStoragePath = Path.Combine(userProfile, ".config", "Cursor", "User", "workspaceStorage");
+				antigravityStoragePath = Path.Combine(userProfile, ".config", "Antigravity", "User", "workspaceStorage");
 #else
-				cursorStoragePath = Path.Combine(userProfile, "AppData", "Roaming", "cursor", "User", "workspaceStorage");
+				antigravityStoragePath = Path.Combine(userProfile, "AppData", "Roaming", "antigravity", "User", "workspaceStorage");
 #endif
-				
-				if (Directory.Exists(cursorStoragePath))
+
+				if (Directory.Exists(antigravityStoragePath))
 				{
-					foreach (var workspaceDir in Directory.GetDirectories(cursorStoragePath))
+					foreach (var workspaceDir in Directory.GetDirectories(antigravityStoragePath))
 					{
 						try
 						{
@@ -189,21 +189,21 @@ namespace Microsoft.Unity.VisualStudio.Editor
 						}
 						catch (Exception ex)
 						{
-							Debug.LogWarning($"[Cursor] Error reading workspace state file: {ex.Message}");
+							Debug.LogWarning($"[Antigravity] Error reading workspace state file: {ex.Message}");
 							continue;
 						}
 					}
 				}
 				else
 				{
-					Debug.LogWarning($"[Cursor] Workspace storage directory not found: {cursorStoragePath}");
+					Debug.LogWarning($"[Antigravity] Workspace storage directory not found: {antigravityStoragePath}");
 				}
 
 				return workspaces.Distinct().ToArray();
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError($"[Cursor] Error getting workspace directory: {ex.Message}");
+				Debug.LogError($"[Antigravity] Error getting workspace directory: {ex.Message}");
 				return null;
 			}
 		}

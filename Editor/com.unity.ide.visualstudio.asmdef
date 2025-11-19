@@ -1,5 +1,5 @@
 {
-    "name": "Unity.Cursor.Editor",
+    "name": "Unity.Antigravity.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"
