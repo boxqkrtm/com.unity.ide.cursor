@@ -1,7 +1,7 @@
 {
-  "name": "com.boxqkrtm.ide.cursor",
-  "displayName": "Cursor Editor",
-  "description": "Cursor editor integration for supporting Cursor as code editor for unity. Adds support for generating csproj files for intellisense purposes, auto discovery of installations, etc.",
+  "name": "com.boxqkrtm.ide.antigravity",
+  "displayName": "Antigravity Editor",
+  "description": "Antigravity editor integration for supporting Antigravity as code editor for unity. Adds support for generating csproj files for intellisense purposes, auto discovery of installations, etc.",
   "version": "2.0.27",
   "unity": "2019.4",
   "unityRelease": "25f1",
@@ -9,6 +9,6 @@
     "com.unity.test-framework": "1.1.9"
   },
   "_upm": {
-    "changelog": "Integration:\n\n- Add Multiple or Single Cursor Instance Options"
+    "changelog": "Integration:\n\n- Add Multiple or Single Antigravity Instance Options"
   }
 }

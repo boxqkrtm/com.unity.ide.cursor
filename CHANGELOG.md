@@ -1,10 +1,10 @@
-# Code Editor Package for Cursor
+# Code Editor Package for Antigravity
 
 ## [2.0.27] - 2025-11-02
 
 Integration:
 
-- Add Multiple or Single Cursor Instance Options
+- Add Multiple or Single Antigravity Instance Options
 
 ## [2.0.26] - 2025-11-02
 
