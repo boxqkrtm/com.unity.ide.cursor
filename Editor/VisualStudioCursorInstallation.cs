@@ -584,7 +584,11 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			var application = Path;
 
 			var workspace = TryFindWorkspace(directory);
+#if UNITY_2020_2_OR_NEWER
 			workspace ??= directory;
+#else
+			workspace = workspace ?? directory;
+#endif
 			directory = workspace;
 
 			if (EditorPrefs.GetBool(ReuseExistingWindowKey, false))
