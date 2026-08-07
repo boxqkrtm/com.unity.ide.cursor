@@ -531,19 +531,46 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			var reuse = EditorPrefs.GetBool(ReuseExistingWindowKey, false);
 			var args = BuildCursorArgs(directory, path, line, column, reuse);
-			ProcessRunner.Start(ProcessStartInfoFor(Path, args));
+			var editorPath = Path;
+			ProcessRunner.Start(ProcessStartInfoFor(editorPath, args));
+			ActivateOnMacOS(editorPath);
 			return true;
 		}
 
+		// Do not use open -n: a new instance confuses Mission Control Spaces while IPC still
+		// delivers goto to the existing Cursor window (issue #16).
 		private static ProcessStartInfo ProcessStartInfoFor(string application, string arguments)
 		{
 #if UNITY_EDITOR_OSX
-			// wrap with built-in OSX open feature
-			arguments = $"-n \"{application}\" --args {arguments}";
+			arguments = $"\"{application}\" --args {arguments}";
 			application = "open";
-			return ProcessRunner.ProcessStartInfoFor(application, arguments, redirect:false, shell: true);
+			return ProcessRunner.ProcessStartInfoFor(application, arguments, redirect: false, shell: true);
 #else
 			return ProcessRunner.ProcessStartInfoFor(application, arguments, redirect: false);
+#endif
+		}
+
+		private static void ActivateOnMacOS(string editorAppPath)
+		{
+#if UNITY_EDITOR_OSX
+			if (string.IsNullOrEmpty(editorAppPath))
+				return;
+
+			try
+			{
+				var appName = IOPath.GetFileNameWithoutExtension(editorAppPath);
+				if (string.IsNullOrEmpty(appName))
+					return;
+
+				// Single-quoted -e payload for the shell; escape any single quotes in the app name
+				appName = appName.Replace("'", "'\\''");
+				var arguments = $"-e 'tell application \"{appName}\" to activate'";
+				ProcessRunner.Start(ProcessRunner.ProcessStartInfoFor("osascript", arguments, redirect: false, shell: true));
+			}
+			catch (Exception)
+			{
+				// Never fail Open() because activation failed
+			}
 #endif
 		}
 

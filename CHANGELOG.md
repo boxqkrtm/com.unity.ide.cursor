@@ -1,5 +1,11 @@
 # Code Editor Package for Cursor
 
+## [2.0.31] - 2026-08-08
+
+Integration:
+
+- Fix macOS Mission Control Space focus when opening scripts from Unity by launching Cursor without `open -n` and activating the existing app — issue #16
+
 ## [2.0.30] - 2026-08-08
 
 Integration:
