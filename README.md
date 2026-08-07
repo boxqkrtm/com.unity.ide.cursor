@@ -12,6 +12,12 @@
 > Violating these attribution rules may trigger warnings in Unity.  
 > If you experience errors during the update, please remove the existing package before reinstalling the new one to avoid conflicts.
 
+## Project Rules
+
+This package always launches Cursor with the **Unity project folder** (the directory that contains the `.sln`), so Cursor can load Project Rules from `.cursor/rules`. Opening only a script file without a folder context can show “No Project Rules Yet” in Cursor.
+
+Optional: in **Edit → Preferences → External Tools**, use **Reuse existing Cursor window** to open files in an existing Cursor window (`--reuse-window`) instead of always opening a new one (`--new-window`). Both modes still pass the project folder.
+
 ## Refresh On Save
 
 Cursor’s Unity extension (`visualstudiotoolsforunity.vstuc`) can refresh Unity’s Asset Database when you save a script. For that to work with this package:
