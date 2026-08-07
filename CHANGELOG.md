@@ -1,5 +1,24 @@
 # Code Editor Package for Cursor
 
+## [2.0.31] - 2026-08-08
+
+Integration:
+
+- Fix macOS Mission Control Space focus when opening scripts from Unity by launching Cursor without `open -n` and activating the existing app — issue #16
+
+## [2.0.30] - 2026-08-08
+
+Integration:
+
+- Always open Cursor on the Unity project folder (never file-only) so Project Rules (`.cursor/rules`) load correctly — issue #22
+- Align `--reuse-window` with `--new-window` (folder always passed); remove flaky workspaceStorage process detection and auto `*.code-workspace` selection
+
+## [2.0.29] - 2026-08-08
+
+Integration:
+
+- Fix Asset Database refresh on save for Unity 6 by respecting `kAutoRefreshMode` (with legacy `kAutoRefresh` fallback) — issue #27
+
 ## [2.0.28] - 2026-02-12
 
 Integration:

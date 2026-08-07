@@ -500,79 +500,15 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 		}
 
-		private Process FindRunningCursorWithSolution(string solutionPath)
+		// Always pass the project folder so Cursor loads Project Rules (.cursor/rules).
+		// Prefer solution directory over auto-discovered *.code-workspace (Open Folder semantics).
+		private static string BuildCursorArgs(string directory, string path, int line, int column, bool reuse)
 		{
-			var normalizedTargetPath = solutionPath.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
+			var flag = reuse ? "--reuse-window" : "--new-window";
+			if (string.IsNullOrEmpty(path))
+				return $"{flag} \"{directory}\"";
 
-#if UNITY_EDITOR_WIN
-			// Keep as is for Windows platform since path already includes drive letter
-#else
-			// Ensure path starts with / for macOS and Linux platforms
-			if (!normalizedTargetPath.StartsWith("/"))
-			{
-				normalizedTargetPath = "/" + normalizedTargetPath;
-			}
-#endif
-
-			var processes = new List<Process>();
-
-			// Get process name list based on different operating systems
-#if UNITY_EDITOR_OSX
-			processes.AddRange(Process.GetProcessesByName("Cursor"));
-			processes.AddRange(Process.GetProcessesByName("Cursor Helper"));
-#elif UNITY_EDITOR_LINUX
-			processes.AddRange(Process.GetProcessesByName("cursor"));
-			processes.AddRange(Process.GetProcessesByName("Cursor"));
-#else
-			processes.AddRange(Process.GetProcessesByName("cursor"));
-#endif
-
-			foreach (var process in processes)
-			{
-				try
-				{
-					var workspaces = ProcessRunner.GetProcessWorkspaces(process);
-					if (workspaces != null && workspaces.Length > 0)
-					{
-						foreach (var workspace in workspaces)
-						{
-							var normalizedWorkspaceDir = workspace.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
-
-#if UNITY_EDITOR_WIN
-							// Keep as is for Windows platform
-#else
-							// Ensure path starts with / for macOS and Linux platforms
-							if (!normalizedWorkspaceDir.StartsWith("/"))
-							{
-								normalizedWorkspaceDir = "/" + normalizedWorkspaceDir;
-							}
-#endif
-
-							if (string.Equals(normalizedWorkspaceDir, normalizedTargetPath, StringComparison.OrdinalIgnoreCase) ||
-								normalizedTargetPath.StartsWith(normalizedWorkspaceDir + "/", StringComparison.OrdinalIgnoreCase) ||
-								normalizedWorkspaceDir.StartsWith(normalizedTargetPath + "/", StringComparison.OrdinalIgnoreCase))
-							{
-								return process;
-							}
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					Debug.LogError($"[Cursor] Error checking process: {ex}");
-					continue;
-				}
-			}
-			return null;
-		}
-
-		private static string TryFindWorkspace(string directory)
-		{
-			var files = Directory.GetFiles(directory, "*.code-workspace", SearchOption.TopDirectoryOnly);
-			if (files.Length == 0 || files.Length > 1)
-				return null;
-
-			return files[0];
+			return $"{flag} \"{directory}\" -g \"{path}\":{line}:{column}";
 		}
 
 		public override bool Open(string path, int line, int column, string solution)
@@ -580,56 +516,61 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			line = Math.Max(1, line);
 			column = Math.Max(0, column);
 
-			var directory = IOPath.GetDirectoryName(solution);
-			var application = Path;
-
-			var workspace = TryFindWorkspace(directory);
-			// Use version-compatible null-coalescing for Unity 2019.4 (C# 7.3) support
-#if UNITY_2020_2_OR_NEWER
-			workspace ??= directory;
-#else
-			workspace = workspace ?? directory;
-#endif
-			directory = workspace;
-
-			if (EditorPrefs.GetBool(ReuseExistingWindowKey, false))
+			if (string.IsNullOrEmpty(solution))
 			{
-				var existingProcess = FindRunningCursorWithSolution(directory);
-				if (existingProcess != null)
-				{
-					try
-					{
-						var args = string.IsNullOrEmpty(path) ?
-							$"--reuse-window \"{directory}\"" :
-							$"--reuse-window -g \"{path}\":{line}:{column}";
-
-						ProcessRunner.Start(ProcessStartInfoFor(application, args));
-						return true;
-					}
-					catch (Exception ex)
-					{
-						Debug.LogError($"[Cursor] Error using existing instance: {ex}");
-					}
-				}
+				Debug.LogWarning("[Cursor] Cannot open editor: solution path is empty.");
+				return false;
 			}
 
-			var newArgs = string.IsNullOrEmpty(path) ?
-				$"--new-window \"{directory}\"" :
-				$"--new-window \"{directory}\" -g \"{path}\":{line}:{column}";
+			var directory = IOPath.GetDirectoryName(solution);
+			if (string.IsNullOrEmpty(directory))
+			{
+				Debug.LogWarning($"[Cursor] Cannot open editor: unable to resolve project directory from solution '{solution}'.");
+				return false;
+			}
 
-			ProcessRunner.Start(ProcessStartInfoFor(application, newArgs));
+			var reuse = EditorPrefs.GetBool(ReuseExistingWindowKey, false);
+			var args = BuildCursorArgs(directory, path, line, column, reuse);
+			var editorPath = Path;
+			ProcessRunner.Start(ProcessStartInfoFor(editorPath, args));
+			ActivateOnMacOS(editorPath);
 			return true;
 		}
 
+		// Do not use open -n: a new instance confuses Mission Control Spaces while IPC still
+		// delivers goto to the existing Cursor window (issue #16).
 		private static ProcessStartInfo ProcessStartInfoFor(string application, string arguments)
 		{
 #if UNITY_EDITOR_OSX
-			// wrap with built-in OSX open feature
-			arguments = $"-n \"{application}\" --args {arguments}";
+			arguments = $"\"{application}\" --args {arguments}";
 			application = "open";
-			return ProcessRunner.ProcessStartInfoFor(application, arguments, redirect:false, shell: true);
+			return ProcessRunner.ProcessStartInfoFor(application, arguments, redirect: false, shell: true);
 #else
 			return ProcessRunner.ProcessStartInfoFor(application, arguments, redirect: false);
+#endif
+		}
+
+		private static void ActivateOnMacOS(string editorAppPath)
+		{
+#if UNITY_EDITOR_OSX
+			if (string.IsNullOrEmpty(editorAppPath))
+				return;
+
+			try
+			{
+				var appName = IOPath.GetFileNameWithoutExtension(editorAppPath);
+				if (string.IsNullOrEmpty(appName))
+					return;
+
+				// Single-quoted -e payload for the shell; escape any single quotes in the app name
+				appName = appName.Replace("'", "'\\''");
+				var arguments = $"-e 'tell application \"{appName}\" to activate'";
+				ProcessRunner.Start(ProcessRunner.ProcessStartInfoFor("osascript", arguments, redirect: false, shell: true));
+			}
+			catch (Exception)
+			{
+				// Never fail Open() because activation failed
+			}
 #endif
 		}
 
