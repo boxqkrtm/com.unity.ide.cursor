@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEditor;
@@ -532,8 +533,10 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			var reuse = EditorPrefs.GetBool(ReuseExistingWindowKey, false);
 			var args = BuildCursorArgs(directory, path, line, column, reuse);
 			var editorPath = Path;
+			// Grant foreground before launch (Windows) while Unity still owns focus (issue #3).
+			BringCursorToForeground(editorPath);
 			ProcessRunner.Start(ProcessStartInfoFor(editorPath, args));
-			ActivateOnMacOS(editorPath);
+			BringCursorToForeground(editorPath);
 			return true;
 		}
 
@@ -550,29 +553,214 @@ namespace Microsoft.Unity.VisualStudio.Editor
 #endif
 		}
 
-		private static void ActivateOnMacOS(string editorAppPath)
+		private static void BringCursorToForeground(string editorAppPath)
 		{
-#if UNITY_EDITOR_OSX
-			if (string.IsNullOrEmpty(editorAppPath))
-				return;
-
 			try
 			{
-				var appName = IOPath.GetFileNameWithoutExtension(editorAppPath);
-				if (string.IsNullOrEmpty(appName))
-					return;
-
-				// Single-quoted -e payload for the shell; escape any single quotes in the app name
-				appName = appName.Replace("'", "'\\''");
-				var arguments = $"-e 'tell application \"{appName}\" to activate'";
-				ProcessRunner.Start(ProcessRunner.ProcessStartInfoFor("osascript", arguments, redirect: false, shell: true));
+#if UNITY_EDITOR_WIN
+				BringCursorToForegroundWindows(editorAppPath);
+#elif UNITY_EDITOR_OSX
+				BringCursorToForegroundMacOS(editorAppPath);
+#elif UNITY_EDITOR_LINUX
+				BringCursorToForegroundLinux(editorAppPath);
+#endif
 			}
 			catch (Exception)
 			{
 				// Never fail Open() because activation failed
 			}
-#endif
 		}
+
+#if UNITY_EDITOR_WIN
+		private const int SwRestore = 9;
+
+		private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		private static extern bool AllowSetForegroundWindow(int dwProcessId);
+
+		[DllImport("user32.dll")]
+		private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+		[DllImport("user32.dll")]
+		private static extern bool IsIconic(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern bool IsWindowVisible(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+		[DllImport("user32.dll")]
+		private static extern IntPtr GetForegroundWindow();
+
+		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+		private static extern int GetWindowTextLength(IntPtr hWnd);
+
+		[DllImport("kernel32.dll")]
+		private static extern uint GetCurrentThreadId();
+
+		[DllImport("user32.dll")]
+		private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+		// Keep delegate alive for EnumWindows (avoid GC during native callback).
+		private static readonly EnumWindowsProc EnumWindowsCallback = OnEnumWindows;
+		private static HashSet<uint> _enumTargetPids;
+		private static List<IntPtr> _enumFoundWindows;
+
+		private static void BringCursorToForegroundWindows(string editorAppPath)
+		{
+			var processes = GetCursorProcesses(editorAppPath).ToList();
+			if (processes.Count == 0)
+				return;
+
+			foreach (var process in processes)
+			{
+				try
+				{
+					AllowSetForegroundWindow(process.Id);
+				}
+				catch (Exception)
+				{
+					/* ignore per-process ASFW failures */
+				}
+			}
+
+			var hwnd = FindCursorMainWindow(processes);
+			if (hwnd == IntPtr.Zero)
+				return;
+
+			if (IsIconic(hwnd))
+				ShowWindow(hwnd, SwRestore);
+
+			if (SetForegroundWindow(hwnd))
+				return;
+
+			// Fallback: temporarily attach to the foreground thread (same idea as stubborn Electron focus).
+			var foreground = GetForegroundWindow();
+			if (foreground == IntPtr.Zero)
+				return;
+
+			var foreThread = GetWindowThreadProcessId(foreground, out _);
+			var appThread = GetWindowThreadProcessId(hwnd, out _);
+			var curThread = GetCurrentThreadId();
+
+			try
+			{
+				AttachThreadInput(curThread, foreThread, true);
+				AttachThreadInput(curThread, appThread, true);
+				if (IsIconic(hwnd))
+					ShowWindow(hwnd, SwRestore);
+				SetForegroundWindow(hwnd);
+			}
+			finally
+			{
+				AttachThreadInput(curThread, appThread, false);
+				AttachThreadInput(curThread, foreThread, false);
+			}
+		}
+
+		private static IntPtr FindCursorMainWindow(IEnumerable<Process> processes)
+		{
+			_enumTargetPids = new HashSet<uint>();
+			foreach (var process in processes)
+			{
+				try
+				{
+					_enumTargetPids.Add((uint)process.Id);
+				}
+				catch (Exception)
+				{
+					/* process may have exited */
+				}
+			}
+
+			if (_enumTargetPids.Count == 0)
+				return IntPtr.Zero;
+
+			_enumFoundWindows = new List<IntPtr>();
+			EnumWindows(EnumWindowsCallback, IntPtr.Zero);
+
+			return _enumFoundWindows.Count > 0 ? _enumFoundWindows[0] : IntPtr.Zero;
+		}
+
+		private static bool OnEnumWindows(IntPtr hWnd, IntPtr lParam)
+		{
+			if (!IsWindowVisible(hWnd) || GetWindowTextLength(hWnd) <= 0)
+				return true;
+
+			GetWindowThreadProcessId(hWnd, out var pid);
+			if (_enumTargetPids != null && _enumTargetPids.Contains(pid))
+				_enumFoundWindows.Add(hWnd);
+
+			return true;
+		}
+
+		private static IEnumerable<Process> GetCursorProcesses(string editorAppPath)
+		{
+			var baseName = IOPath.GetFileNameWithoutExtension(editorAppPath);
+			if (string.IsNullOrEmpty(baseName))
+				baseName = "Cursor";
+
+			var candidates = new[] { baseName, baseName.ToLowerInvariant(), "Cursor", "cursor" }
+				.Distinct(StringComparer.OrdinalIgnoreCase);
+
+			var seen = new HashSet<int>();
+			foreach (var name in candidates)
+			{
+				Process[] processes;
+				try
+				{
+					processes = Process.GetProcessesByName(name);
+				}
+				catch (Exception)
+				{
+					continue;
+				}
+
+				foreach (var process in processes)
+				{
+					if (seen.Add(process.Id))
+						yield return process;
+				}
+			}
+		}
+#endif
+
+#if UNITY_EDITOR_OSX
+		private static void BringCursorToForegroundMacOS(string editorAppPath)
+		{
+			if (string.IsNullOrEmpty(editorAppPath))
+				return;
+
+			var appName = IOPath.GetFileNameWithoutExtension(editorAppPath);
+			if (string.IsNullOrEmpty(appName))
+				return;
+
+			// Single-quoted -e payload for the shell; escape any single quotes in the app name
+			appName = appName.Replace("'", "'\\''");
+			var arguments = $"-e 'tell application \"{appName}\" to activate'";
+			ProcessRunner.Start(ProcessRunner.ProcessStartInfoFor("osascript", arguments, redirect: false, shell: true));
+		}
+#endif
+
+#if UNITY_EDITOR_LINUX
+		private static void BringCursorToForegroundLinux(string editorAppPath)
+		{
+			var appName = IOPath.GetFileNameWithoutExtension(editorAppPath);
+			if (string.IsNullOrEmpty(appName))
+				appName = "Cursor";
+
+			// Best-effort; wmctrl may be missing on Wayland or minimal installs.
+			ProcessRunner.Start(ProcessRunner.ProcessStartInfoFor("wmctrl", $"-xa \"{appName}\"", redirect: false, shell: true));
+		}
+#endif
 
 		public static void Initialize()
 		{

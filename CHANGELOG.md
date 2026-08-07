@@ -1,5 +1,11 @@
 # Code Editor Package for Cursor
 
+## [2.0.32] - 2026-08-08
+
+Integration:
+
+- Bring Cursor to the foreground when opening files from Unity (Windows `AllowSetForegroundWindow` / `SetForegroundWindow`; macOS activate; Linux `wmctrl` best-effort) — issue #3
+
 ## [2.0.31] - 2026-08-08
 
 Integration:
