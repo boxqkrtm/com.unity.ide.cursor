@@ -15,8 +15,9 @@
 ## Cursor-specific features
 Compared to Unity's Visual Studio / VS Code integration, this package adds:
 - **Cursor detection** - Cursor shows up in External Script Editor on Windows, macOS and Linux  
-- **Project folder context** - Cursor is always opened with the Unity project folder, so workspace features such as Project Rules (`.cursor/rules`) work. If the project root has exactly one `.code-workspace` file, that workspace is opened  
+- **Project folder context** - Cursor is always opened with the Unity project folder by default, so workspace features such as Project Rules (`.cursor/rules`) work  
 - **Reuse existing Cursor window** - option in External Tools to open files in a running Cursor window instead of a new one  
+- **Open `.code-workspace`** - option in External Tools to open the project's single `.code-workspace` file instead of the folder  
 - **Refresh on save follows Auto Refresh** - a refresh request from Cursor is ignored when Unity's Auto Refresh is Disabled
 
 ## Refresh on save

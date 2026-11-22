@@ -21,6 +21,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 	{
 		private static readonly IGenerator _generator = new SdkStyleProjectGeneration();
 		internal const string ReuseExistingWindowKey = "cursor_reuse_existing_window";
+		internal const string OpenCodeWorkspaceKey = "cursor_open_code_workspace";
 
 		public override bool SupportsAnalyzers
 		{
@@ -510,7 +511,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		}
 
 		// Always pass the project target (never file-only) so Cursor opens the right window and loads Project Rules (.cursor/rules).
-		// The target is the project's single *.code-workspace if there is exactly one, otherwise the project folder.
+		// The target is the project folder, or its single *.code-workspace when that option is enabled.
 		private static string BuildCursorArgs(string target, string path, int line, int column, bool reuse)
 		{
 			var flag = reuse ? "--reuse-window" : "--new-window";
@@ -539,7 +540,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 
 			var reuse = EditorPrefs.GetBool(ReuseExistingWindowKey, false);
-			var target = TryFindWorkspace(directory) ?? directory;
+			var target = EditorPrefs.GetBool(OpenCodeWorkspaceKey, false) ? TryFindWorkspace(directory) ?? directory : directory;
 			var args = BuildCursorArgs(target, path, line, column, reuse);
 			ProcessRunner.Start(ProcessStartInfoFor(Path, args));
 			return true;
