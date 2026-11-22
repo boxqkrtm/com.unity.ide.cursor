@@ -338,6 +338,11 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 
 			var content = @"{
 " + excludes + @",
+    ""explorer.fileNesting.enabled"": true,
+    ""explorer.fileNesting.patterns"": {
+        ""*.sln"": ""*.csproj"",
+        ""*.slnx"": ""*.csproj""
+    },
     ""dotnet.defaultSolution"": """ + IOPath.GetFileName(ProjectGenerator.SolutionFile()) + @"""
 }";
 
@@ -353,27 +358,26 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 				var settings = JSONNode.Parse(content);
 
 				var excludes = settings[excludesKey] as JSONObject;
-				if (excludes == null)
-					return;
-
 				var patchList = new List<string>();
 				var patched = false;
 
 				// Remove files.exclude for solution+project files in the project root
-				foreach (var exclude in excludes) {
-					if (!bool.TryParse(exclude.Value, out var exc) || !exc)
-						continue;
+				if (excludes != null) {
+					foreach (var exclude in excludes) {
+						if (!bool.TryParse(exclude.Value, out var exc) || !exc)
+							continue;
 
-					var key = exclude.Key;
+						var key = exclude.Key;
 
-					if (!key.EndsWith(".sln") && !key.EndsWith(".csproj"))
-						continue;
+						if (!key.EndsWith(".sln") && !key.EndsWith(".slnx") && !key.EndsWith(".csproj"))
+							continue;
 
-					if (!Regex.IsMatch(key, "^(\\*\\*[\\\\\\/])?\\*\\.(sln|csproj)$"))
-						continue;
+						if (!Regex.IsMatch(key, "^(\\*\\*[\\\\\\/])?\\*\\.(sln|slnx|csproj)$"))
+							continue;
 
-					patchList.Add(key);
-					patched = true;
+						patchList.Add(key);
+						patched = true;
+					}
 				}
 
 				// Check default solution
@@ -387,8 +391,10 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 				if (!patched)
 					return;
 
-				foreach (var patch in patchList)
-					excludes.Remove(patch);
+				if (excludes != null) {
+					foreach (var patch in patchList)
+						excludes.Remove(patch);
+				}
 
 				WriteAllTextFromJObject(settingsFile, settings);
 			} catch (Exception) {

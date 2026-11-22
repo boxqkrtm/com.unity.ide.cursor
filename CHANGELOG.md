@@ -10,6 +10,10 @@ Integration:
 - Skip refresh on save during Play Mode when Auto Refresh is set to Enabled Outside Playmode
 - Recognize Cursor AppImage executables on Linux (e.g. `Cursor-1.0.0-x86_64.AppImage`, also discovered in `~/Applications`) so Unity opens Cursor with the project folder and Project Rules load — issue #22
 
+Project generation:
+
+- Generate `<project>.slnx` instead of `.sln` for SDK-style projects and point `dotnet.defaultSolution` at it (Cursor's C# extension needs .NET SDK 9.0.200 or newer to load `.slnx`)
+
 ## [2.0.28] - 2026-02-12
 
 Integration:

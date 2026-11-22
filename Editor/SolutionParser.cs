@@ -2,8 +2,11 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Microsoft.Unity.VisualStudio.Editor
 {
@@ -16,7 +19,17 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 		public static Solution ParseSolutionFile(string filename, IFileIO fileIO)
 		{
-			return ParseSolutionContent(fileIO.ReadAllText(filename));
+			var extension = Path.GetExtension(filename).ToLowerInvariant();
+			if (extension == ".sln")
+			{
+				return ParseSolutionContent(fileIO.ReadAllText(filename));
+			}
+			if (extension == ".slnx")
+			{
+				return ParseSolutionXmlContent(fileIO.ReadAllText(filename));
+			}
+
+			throw new NotSupportedException();
 		}
 
 		public static Solution ParseSolutionContent(string content)
@@ -75,6 +88,31 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 
 			return properties.ToArray();
+		}
+
+		private static Solution ParseSolutionXmlContent(string content)
+		{
+			return new Solution
+			{
+				Projects = ParseSolutionXmlProjects(content),
+				Properties = Array.Empty<SolutionProperties>(),
+			};
+		}
+
+		private static SolutionProjectEntry[] ParseSolutionXmlProjects(string content)
+		{
+			var document = XDocument.Parse(content);
+			var projects = new List<SolutionProjectEntry>();
+
+			foreach (var project in document.Descendants("Project"))
+			{
+				projects.Add(new SolutionProjectEntry
+				{
+					FileName = project.Attribute("Path")?.Value,
+				});
+			}
+
+			return projects.ToArray();
 		}
 	}
 }
