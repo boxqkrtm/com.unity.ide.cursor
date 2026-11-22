@@ -500,15 +500,24 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 		}
 
-		// Always pass the project folder so Cursor loads Project Rules (.cursor/rules).
-		// Prefer solution directory over auto-discovered *.code-workspace (Open Folder semantics).
-		private static string BuildCursorArgs(string directory, string path, int line, int column, bool reuse)
+		private static string TryFindWorkspace(string directory)
+		{
+			var files = Directory.GetFiles(directory, "*.code-workspace", SearchOption.TopDirectoryOnly);
+			if (files.Length == 0 || files.Length > 1)
+				return null;
+
+			return files[0];
+		}
+
+		// Always pass the project target (never file-only) so Cursor opens the right window and loads Project Rules (.cursor/rules).
+		// The target is the project's single *.code-workspace if there is exactly one, otherwise the project folder.
+		private static string BuildCursorArgs(string target, string path, int line, int column, bool reuse)
 		{
 			var flag = reuse ? "--reuse-window" : "--new-window";
 			if (string.IsNullOrEmpty(path))
-				return $"{flag} \"{directory}\"";
+				return $"{flag} \"{target}\"";
 
-			return $"{flag} \"{directory}\" -g \"{path}\":{line}:{column}";
+			return $"{flag} \"{target}\" -g \"{path}\":{line}:{column}";
 		}
 
 		public override bool Open(string path, int line, int column, string solution)
@@ -530,7 +539,8 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 
 			var reuse = EditorPrefs.GetBool(ReuseExistingWindowKey, false);
-			var args = BuildCursorArgs(directory, path, line, column, reuse);
+			var target = TryFindWorkspace(directory) ?? directory;
+			var args = BuildCursorArgs(target, path, line, column, reuse);
 			ProcessRunner.Start(ProcessStartInfoFor(Path, args));
 			return true;
 		}
