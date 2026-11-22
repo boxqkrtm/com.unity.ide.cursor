@@ -25,4 +25,3 @@ Compared to Unity's Visual Studio / VS Code integration, this package adds:
 - Install the **Unity** extension (`visualstudiotoolsforunity.vstuc`) in Cursor and enable `vstuc.refreshOnSave`  
   - It is not in Cursor's extension store: switch Cursor's marketplace to the VS Code Marketplace, or install the `.vsix`  
 - Keep Auto Refresh set to **Enabled** or **Enabled Outside Playmode** (Preferences -> Asset Pipeline)  
-- Remove `com.unity.ide.vscode` if it is still installed
