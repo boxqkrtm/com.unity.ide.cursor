@@ -233,10 +233,20 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			return package.version;
 		}
 
+		private static bool IsAutoRefreshEnabled()
+		{
+			// Unity 2022.2+ / Unity 6: Auto Refresh is an enum stored as kAutoRefreshMode (0 = Disabled).
+			// Legacy Unity used the bool kAutoRefresh.
+			if (EditorPrefs.HasKey("kAutoRefreshMode"))
+				return EditorPrefs.GetInt("kAutoRefreshMode") != 0;
+
+			return EditorPrefs.GetBool("kAutoRefresh", true);
+		}
+
 		private static void Refresh()
 		{
 			// If the user disabled auto-refresh in Unity, do not try to force refresh the Asset database
-			if (!EditorPrefs.GetBool("kAutoRefresh", true))
+			if (!IsAutoRefreshEnabled())
 				return;
 
 			if (UnityInstallation.IsInSafeMode)

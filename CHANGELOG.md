@@ -1,5 +1,11 @@
 # Code Editor Package for Cursor
 
+## [Unreleased]
+
+Integration:
+
+- Fix Asset Database refresh on save for Unity 6 by respecting `kAutoRefreshMode` (with legacy `kAutoRefresh` fallback) — issue #27
+
 ## [2.0.28] - 2026-02-12
 
 Integration:
