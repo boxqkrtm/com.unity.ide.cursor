@@ -21,6 +21,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 	{
 		private static readonly IGenerator _generator = new SdkStyleProjectGeneration();
 		internal const string ReuseExistingWindowKey = "cursor_reuse_existing_window";
+		internal const string OpenCodeWorkspaceKey = "cursor_open_code_workspace";
 
 		public override bool SupportsAnalyzers
 		{
@@ -500,72 +501,6 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 		}
 
-		private Process FindRunningCursorWithSolution(string solutionPath)
-		{
-			var normalizedTargetPath = solutionPath.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
-
-#if UNITY_EDITOR_WIN
-			// Keep as is for Windows platform since path already includes drive letter
-#else
-			// Ensure path starts with / for macOS and Linux platforms
-			if (!normalizedTargetPath.StartsWith("/"))
-			{
-				normalizedTargetPath = "/" + normalizedTargetPath;
-			}
-#endif
-
-			var processes = new List<Process>();
-
-			// Get process name list based on different operating systems
-#if UNITY_EDITOR_OSX
-			processes.AddRange(Process.GetProcessesByName("Cursor"));
-			processes.AddRange(Process.GetProcessesByName("Cursor Helper"));
-#elif UNITY_EDITOR_LINUX
-			processes.AddRange(Process.GetProcessesByName("cursor"));
-			processes.AddRange(Process.GetProcessesByName("Cursor"));
-#else
-			processes.AddRange(Process.GetProcessesByName("cursor"));
-#endif
-
-			foreach (var process in processes)
-			{
-				try
-				{
-					var workspaces = ProcessRunner.GetProcessWorkspaces(process);
-					if (workspaces != null && workspaces.Length > 0)
-					{
-						foreach (var workspace in workspaces)
-						{
-							var normalizedWorkspaceDir = workspace.Replace('\\', '/').TrimEnd('/').ToLowerInvariant();
-
-#if UNITY_EDITOR_WIN
-							// Keep as is for Windows platform
-#else
-							// Ensure path starts with / for macOS and Linux platforms
-							if (!normalizedWorkspaceDir.StartsWith("/"))
-							{
-								normalizedWorkspaceDir = "/" + normalizedWorkspaceDir;
-							}
-#endif
-
-							if (string.Equals(normalizedWorkspaceDir, normalizedTargetPath, StringComparison.OrdinalIgnoreCase) ||
-								normalizedTargetPath.StartsWith(normalizedWorkspaceDir + "/", StringComparison.OrdinalIgnoreCase) ||
-								normalizedWorkspaceDir.StartsWith(normalizedTargetPath + "/", StringComparison.OrdinalIgnoreCase))
-							{
-								return process;
-							}
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					Debug.LogError($"[Cursor] Error checking process: {ex}");
-					continue;
-				}
-			}
-			return null;
-		}
-
 		private static string TryFindWorkspace(string directory)
 		{
 			var files = Directory.GetFiles(directory, "*.code-workspace", SearchOption.TopDirectoryOnly);
@@ -575,49 +510,39 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			return files[0];
 		}
 
+		// Always pass the project target (never file-only) so Cursor opens the right window and loads Project Rules (.cursor/rules).
+		// The target is the project folder, or its single *.code-workspace when that option is enabled.
+		private static string BuildCursorArgs(string target, string path, int line, int column, bool reuse)
+		{
+			var flag = reuse ? "--reuse-window" : "--new-window";
+			if (string.IsNullOrEmpty(path))
+				return $"{flag} \"{target}\"";
+
+			return $"{flag} \"{target}\" -g \"{path}\":{line}:{column}";
+		}
+
 		public override bool Open(string path, int line, int column, string solution)
 		{
 			line = Math.Max(1, line);
 			column = Math.Max(0, column);
 
-			var directory = IOPath.GetDirectoryName(solution);
-			var application = Path;
-
-			var workspace = TryFindWorkspace(directory);
-			// Use version-compatible null-coalescing for Unity 2019.4 (C# 7.3) support
-#if UNITY_2020_2_OR_NEWER
-			workspace ??= directory;
-#else
-			workspace = workspace ?? directory;
-#endif
-			directory = workspace;
-
-			if (EditorPrefs.GetBool(ReuseExistingWindowKey, false))
+			if (string.IsNullOrEmpty(solution))
 			{
-				var existingProcess = FindRunningCursorWithSolution(directory);
-				if (existingProcess != null)
-				{
-					try
-					{
-						var args = string.IsNullOrEmpty(path) ?
-							$"--reuse-window \"{directory}\"" :
-							$"--reuse-window -g \"{path}\":{line}:{column}";
-
-						ProcessRunner.Start(ProcessStartInfoFor(application, args));
-						return true;
-					}
-					catch (Exception ex)
-					{
-						Debug.LogError($"[Cursor] Error using existing instance: {ex}");
-					}
-				}
+				Debug.LogWarning("[Cursor] Cannot open editor: solution path is empty.");
+				return false;
 			}
 
-			var newArgs = string.IsNullOrEmpty(path) ?
-				$"--new-window \"{directory}\"" :
-				$"--new-window \"{directory}\" -g \"{path}\":{line}:{column}";
+			var directory = IOPath.GetDirectoryName(solution);
+			if (string.IsNullOrEmpty(directory))
+			{
+				Debug.LogWarning($"[Cursor] Cannot open editor: unable to resolve project directory from solution '{solution}'.");
+				return false;
+			}
 
-			ProcessRunner.Start(ProcessStartInfoFor(application, newArgs));
+			var reuse = EditorPrefs.GetBool(ReuseExistingWindowKey, false);
+			var target = EditorPrefs.GetBool(OpenCodeWorkspaceKey, false) ? TryFindWorkspace(directory) ?? directory : directory;
+			var args = BuildCursorArgs(target, path, line, column, reuse);
+			ProcessRunner.Start(ProcessStartInfoFor(Path, args));
 			return true;
 		}
 

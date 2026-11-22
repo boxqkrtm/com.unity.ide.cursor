@@ -142,6 +142,11 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				if (newReuseWindow != reuseWindow)
 					EditorPrefs.SetBool(VisualStudioCursorInstallation.ReuseExistingWindowKey, newReuseWindow);
 
+				var openWorkspace = EditorPrefs.GetBool(VisualStudioCursorInstallation.OpenCodeWorkspaceKey, false);
+				var newOpenWorkspace = EditorGUILayout.Toggle(new GUIContent("Open .code-workspace", "When enabled and the project root has exactly one .code-workspace file, opens that workspace instead of the project folder."), openWorkspace);
+				if (newOpenWorkspace != openWorkspace)
+					EditorPrefs.SetBool(VisualStudioCursorInstallation.OpenCodeWorkspaceKey, newOpenWorkspace);
+
 				EditorGUILayout.Space();
 			}
 

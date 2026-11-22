@@ -4,6 +4,8 @@
 
 Integration:
 
+- Always open Cursor on the Unity project folder (never file-only) so Project Rules (`.cursor/rules`) load correctly — issue #22
+- Align `--reuse-window` with `--new-window` (folder always passed); remove flaky workspaceStorage process detection; auto `*.code-workspace` selection is now an opt-in External Tools option
 - Fix Asset Database refresh on save for Unity 6 by respecting `kAutoRefreshMode` (with legacy `kAutoRefresh` fallback) — issue #27
 
 ## [2.0.28] - 2026-02-12

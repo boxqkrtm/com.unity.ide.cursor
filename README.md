@@ -12,14 +12,17 @@
 > Violating these attribution rules may trigger warnings in Unity.  
 > If you experience errors during the update, please remove the existing package before reinstalling the new one to avoid conflicts.
 
-## Refresh On Save
+## Cursor-specific features
+Compared to Unity's Visual Studio / VS Code integration, this package adds:
+- **Cursor detection** - Cursor shows up in External Script Editor on Windows, macOS and Linux  
+- **Project folder context** - Cursor is always opened with the Unity project folder by default, so workspace features such as Project Rules (`.cursor/rules`) work  
+- **Reuse existing Cursor window** - option in External Tools to open files in a running Cursor window instead of a new one  
+- **Open `.code-workspace`** - option in External Tools to open the project's single `.code-workspace` file instead of the folder  
+- **Refresh on save follows Auto Refresh** - a refresh request from Cursor is ignored when Unity's Auto Refresh is Disabled
 
-Cursor’s Unity extension (`visualstudiotoolsforunity.vstuc`) can refresh Unity’s Asset Database when you save a script. For that to work with this package:
-
-1. Set **Edit → Preferences → External Tools → External Script Editor** to **Cursor**.
-2. Install the **Unity** / `vstuc` extension in Cursor and enable **Refresh Unity’s Asset Database on save**.
-3. In Unity, keep **Preferences → Asset Pipeline → Auto Refresh** set to **Enabled** or **Enabled Outside Play Mode** (not **Disabled**).
-4. Remove the legacy `com.unity.ide.vscode` package if it is still installed (it can conflict with this package).
-5. Allow Unity and Cursor to use local UDP/TCP (firewall); ensure the project allows the Editor to run in the background (`Application.runInBackground`).
-
-After a successful refresh, Unity regenerates the relevant `.csproj` files so IntelliSense picks up new scripts.
+## Refresh on save
+- Set External Script Editor to **Cursor** (Edit -> Preferences -> External Tools)  
+- Install the **Unity** extension (`visualstudiotoolsforunity.vstuc`) in Cursor and enable `vstuc.refreshOnSave`  
+  - It is not in Cursor's extension store: switch Cursor's marketplace to the VS Code Marketplace, or install the `.vsix`  
+- Keep Auto Refresh set to **Enabled** or **Enabled Outside Playmode** (Preferences -> Asset Pipeline)  
+- Remove `com.unity.ide.vscode` if it is still installed
