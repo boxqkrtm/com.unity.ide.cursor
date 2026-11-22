@@ -233,12 +233,21 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			return package.version;
 		}
 
+		// Taken from UnityEditor (values stored in the kAutoRefreshMode EditorPref)
+		internal enum AssetPipelineAutoRefreshMode { Disabled = 0, Enabled = 1, EnabledOutsidePlaymode = 2 }
+
 		private static bool IsAutoRefreshEnabled()
 		{
-			// Unity 2022.2+ / Unity 6: Auto Refresh is an enum stored as kAutoRefreshMode (0 = Disabled).
-			// Legacy Unity used the bool kAutoRefresh.
+			// Newer Unity stores Auto Refresh as an int enum in kAutoRefreshMode:
+			// 0 = Disabled, 1 = Enabled, 2 = Enabled Outside Playmode (no refresh while playing).
+			// Legacy Unity used the bool kAutoRefresh; if neither key exists, refresh stays enabled.
+			// Called from ProcessIncoming on EditorApplication.update (main thread), so Application.isPlaying is safe to read.
 			if (EditorPrefs.HasKey("kAutoRefreshMode"))
-				return EditorPrefs.GetInt("kAutoRefreshMode") != 0;
+			{
+				var mode = (AssetPipelineAutoRefreshMode)EditorPrefs.GetInt("kAutoRefreshMode");
+				return mode == AssetPipelineAutoRefreshMode.Enabled
+					|| (mode == AssetPipelineAutoRefreshMode.EnabledOutsidePlaymode && !Application.isPlaying);
+			}
 
 			return EditorPrefs.GetBool("kAutoRefresh", true);
 		}
