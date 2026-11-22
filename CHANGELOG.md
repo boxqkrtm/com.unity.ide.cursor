@@ -1,5 +1,19 @@
 # Code Editor Package for Cursor
 
+## [Unreleased]
+
+Integration:
+
+- Always open Cursor on the Unity project folder (never file-only) so Project Rules (`.cursor/rules`) load correctly — issue #22
+- Align `--reuse-window` with `--new-window` (folder always passed); remove flaky workspaceStorage process detection; auto `*.code-workspace` selection is now an opt-in External Tools option
+- Fix Asset Database refresh on save for Unity 6 by respecting `kAutoRefreshMode` (with legacy `kAutoRefresh` fallback) — issue #27
+- Skip refresh on save during Play Mode when Auto Refresh is set to Enabled Outside Playmode
+- Recognize Cursor AppImage executables on Linux (e.g. `Cursor-1.0.0-x86_64.AppImage`, also discovered in `~/Applications`) so Unity opens Cursor with the project folder and Project Rules load — issue #22
+
+Project generation:
+
+- Generate `<project>.slnx` instead of `.sln` for SDK-style projects and point `dotnet.defaultSolution` at it (Cursor's C# extension needs .NET SDK 9.0.200 or newer to load `.slnx`)
+
 ## [2.0.28] - 2026-02-12
 
 Integration:
