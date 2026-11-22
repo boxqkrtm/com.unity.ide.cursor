@@ -1,6 +1,6 @@
 # Code Editor Package for Cursor
 
-## [2.0.29] - 2026-08-08
+## [Unreleased]
 
 Integration:
 
