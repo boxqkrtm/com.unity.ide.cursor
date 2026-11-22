@@ -76,8 +76,23 @@ namespace Microsoft.Unity.VisualStudio.Editor
 #elif UNITY_EDITOR_WIN
 			return File.Exists(path) && Regex.IsMatch(path, ".*Cursor.*.exe$", RegexOptions.IgnoreCase);
 #else
-			return File.Exists(path) && path.EndsWith("cursor", StringComparison.OrdinalIgnoreCase);
+			return File.Exists(path) && (path.EndsWith("cursor", StringComparison.OrdinalIgnoreCase) || IsAppImage(path));
 #endif
+		}
+
+		// On Linux, Cursor is distributed as an AppImage, e.g. Cursor-1.0.0-x86_64.AppImage
+		private static readonly Regex AppImageFileName = new Regex(@"^cursor.*\.appimage$", RegexOptions.IgnoreCase);
+		private static readonly Regex AppImageVersion = new Regex(@"\d+\.\d+\.\d+");
+
+		private static bool IsAppImage(string path)
+		{
+			return AppImageFileName.IsMatch(IOPath.GetFileName(path));
+		}
+
+		private static Version GetAppImageVersion(string path)
+		{
+			var match = AppImageVersion.Match(IOPath.GetFileName(path));
+			return match.Success && Version.TryParse(match.Value, out var version) ? version : null;
 		}
 
 		[Serializable]
@@ -102,6 +117,12 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			try
 			{
+#if !UNITY_EDITOR_WIN && !UNITY_EDITOR_OSX
+				// an AppImage has no resources/app/package.json next to it, the version is in the file name
+				if (IsAppImage(editorPath))
+					version = GetAppImageVersion(editorPath);
+#endif
+
 				var manifestBase = GetRealPath(editorPath);
 
 #if UNITY_EDITOR_WIN
@@ -167,6 +188,9 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			// Preference ordered base directories relative to which desktop files should be searched
 			candidates.AddRange(GetXdgCandidates());
+
+			// AppImages downloaded from cursor.com, conventionally kept in ~/Applications
+			candidates.AddRange(GetAppImageCandidates());
 #endif
 
 			foreach (var candidate in candidates.Distinct())
@@ -210,6 +234,22 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				yield return match.Groups[1].Value;
 				break;
 			}
+		}
+
+		private static IEnumerable<string> GetAppImageCandidates()
+		{
+			try
+			{
+				var applications = IOPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Applications");
+				if (Directory.Exists(applications))
+					return Directory.GetFiles(applications).Where(IsAppImage).OrderByDescending(f => f).ToArray();
+			}
+			catch
+			{
+				// do not fail if we cannot enumerate ~/Applications
+			}
+
+			return Array.Empty<string>();
 		}
 
 		[System.Runtime.InteropServices.DllImport ("libc")]
