@@ -2,13 +2,13 @@
   "name": "com.boxqkrtm.ide.cursor",
   "displayName": "Cursor Editor",
   "description": "Cursor editor integration for supporting Cursor as code editor for unity. Adds support for generating csproj files for intellisense purposes, auto discovery of installations, etc.",
-  "version": "2.0.28",
+  "version": "2.0.29",
   "unity": "2019.4",
   "unityRelease": "25f1",
   "dependencies": {
     "com.unity.test-framework": "1.1.9"
   },
   "_upm": {
-    "changelog": "Integration:\n\n- Add Multiple or Single Cursor Instance Options"
+    "changelog": "Integration:\n\n- Always open Cursor on the project folder so Project Rules load; .code-workspace is now opt-in\n- Recognize Cursor AppImage on Linux\n- Respect Auto Refresh mode on save, including Play Mode\n\nProject generation:\n\n- Generate .slnx for SDK-style projects (needs .NET SDK 9.0.200+ in Cursor)"
   }
 }

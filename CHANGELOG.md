@@ -1,14 +1,14 @@
 # Code Editor Package for Cursor
 
-## [Unreleased]
+## [2.0.29] - 2026-11-23
 
 Integration:
 
-- Always open Cursor on the Unity project folder (never file-only) so Project Rules (`.cursor/rules`) load correctly — issue #22
+- Always open Cursor on the Unity project folder (never file-only) so Project Rules (`.cursor/rules`) load correctly
 - Align `--reuse-window` with `--new-window` (folder always passed); remove flaky workspaceStorage process detection; auto `*.code-workspace` selection is now an opt-in External Tools option
-- Fix Asset Database refresh on save for Unity 6 by respecting `kAutoRefreshMode` (with legacy `kAutoRefresh` fallback) — issue #27
+- Fix Asset Database refresh on save for Unity 6 by respecting `kAutoRefreshMode` (with legacy `kAutoRefresh` fallback)
 - Skip refresh on save during Play Mode when Auto Refresh is set to Enabled Outside Playmode
-- Recognize Cursor AppImage executables on Linux (e.g. `Cursor-1.0.0-x86_64.AppImage`, also discovered in `~/Applications`) so Unity opens Cursor with the project folder and Project Rules load — issue #22
+- Recognize Cursor AppImage executables on Linux (e.g. `Cursor-1.0.0-x86_64.AppImage`, also discovered in `~/Applications`) so Unity opens Cursor with the project folder and Project Rules load
 
 Project generation:
 
