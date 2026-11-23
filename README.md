@@ -17,3 +17,9 @@ Compared to Unity's Visual Studio package (`com.unity.ide.visualstudio`), this p
 - **Cursor detection** - Cursor shows up in External Script Editor on Windows, macOS and Linux  
 - **Reuse existing Cursor window** - option in External Tools to open files in a running Cursor window instead of a new one  
 - **Open `.code-workspace`** - option in External Tools (off by default) to open the project's single `.code-workspace` file instead of the project folder
+
+## Troubleshooting
+### Unity doesn't refresh on save
+Install the Unity extension in Cursor:
+1. Download the [VSIX](https://marketplace.visualstudio.com/_apis/public/gallery/publishers/VisualStudioToolsForUnity/vsextensions/vstuc/latest/vspackage)
+2. Cursor → Extensions → `...` → **Install from VSIX...**
